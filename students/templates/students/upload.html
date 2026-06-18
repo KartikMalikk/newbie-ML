@@ -1,0 +1,341 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduPredict | Upload Data</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", "Segoe UI", sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        /* Background Video */
+        .video-bg {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        /* Dark Overlay */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(
+                rgba(0,0,0,0.65),
+                rgba(0,0,0,0.65)
+            );
+            z-index: -1;
+        }
+
+        /* Center Layout */
+        .container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Glass Card */
+        .card {
+            width: 480px;
+            padding: 50px 40px 40px 40px;
+            border-radius: 18px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+            animation: fadeInUp 0.9s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Headings */
+        .title {
+            font-size: 2.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            margin-top: 8px;
+            font-size: 1.05rem;
+            color: #cfd8dc;
+        }
+
+        .description {
+            margin: 22px 0 28px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* Drag & Drop Zone */
+        .dropzone {
+            width: 100%;
+            padding: 50px 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 14px;
+            color: #e0e0e0;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            margin-bottom: 8px; /* smaller margin to error message */
+            user-select: none;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+
+            line-height: 1.3;
+            min-height: 120px;
+            white-space: normal;
+            word-wrap: break-word;
+            gap: 8px;
+        }
+
+        .dropzone.dragover {
+            background-color: rgba(0, 198, 255, 0.15);
+            border-color: #00c6ff;
+            color: #00c6ff;
+        }
+
+        /* Error message */
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            height: 18px; /* reserve space even when empty */
+        }
+
+        /* Hidden file input */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Upload Button */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            cursor: pointer;
+            transition: all 0.35s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 114, 255, 0.6);
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            margin-top: 16px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            background: transparent;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 26px;
+            font-size: 0.85rem;
+            color: #b0bec5;
+            letter-spacing: 0.3px;
+            text-align: center;
+        }
+
+        /* Back Link */
+        .back {
+            display: inline-block;
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: #90caf9;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Background Video -->
+<video class="video-bg" autoplay muted loop>
+    <source src="{% static 'students/bg.mp4' %}" type="video/mp4">
+</video>
+
+<div class="overlay"></div>
+
+<div class="container">
+    <div class="card">
+
+        <h1 class="title">Upload Student Data</h1>
+        <p class="subtitle">Excel / CSV File</p>
+
+        <p class="description">
+            Upload your student dataset to train the machine learning model
+            and generate performance predictions.
+        </p>
+
+        <!-- Upload Form -->
+        <form method="post" enctype="multipart/form-data" id="uploadForm" novalidate>
+            {% csrf_token %}
+            <label for="fileInput" class="dropzone" id="dropzone">
+                Drag & Drop your file here or click to select
+            </label>
+            <input type="file" id="fileInput" name="file" accept=".xls,.xlsx,.csv" required>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <button type="submit" class="btn">Upload & Process</button>
+        </form>
+
+        <!-- Logout Form -->
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+
+        <div class="footer" style="font-size:0.85rem; color:#90caf9; margin-top: 24px;">
+          Built with
+          <a href="https://pandas.pydata.org/" target="_blank" style="color:#42a5f5; text-decoration:none;">Pandas</a>,
+          <a href="https://scikit-learn.org/" target="_blank" style="color:#42a5f5; text-decoration:none;">Scikit-Learn</a>,
+          <a href="https://www.djangoproject.com/" target="_blank" style="color:#42a5f5; text-decoration:none;">Django</a>,
+          and
+          <a href="https://www.django-rest-framework.org/" target="_blank" style="color:#42a5f5; text-decoration:none;">DRF</a>.
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const errorMessage = document.getElementById('errorMessage');
+    const allowedExtensions = ['xls', 'xlsx', 'csv'];
+    const defaultText = 'Drag & Drop your file here or click to select';
+
+    function updateDropzoneText(filename) {
+        dropzone.textContent = `Selected file:\n${filename}`;
+    }
+
+    function resetDropzoneText() {
+        dropzone.textContent = defaultText;
+    }
+
+    function validateFile(file) {
+        const fileName = file.name.toLowerCase();
+        return allowedExtensions.some(ext => fileName.endsWith('.' + ext));
+    }
+
+    // Highlight on drag over
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+
+    // Remove highlight on drag leave
+    dropzone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+    });
+
+    // Handle drop event
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+
+        if (e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (!validateFile(file)) {
+                errorMessage.textContent = 'Error: Only Excel (.xls, .xlsx) or CSV files are allowed.';
+                resetDropzoneText();
+                fileInput.value = '';
+                return;
+            }
+
+            errorMessage.textContent = '';
+            fileInput.files = e.dataTransfer.files;
+            updateDropzoneText(file.name);
+        }
+    });
+
+    // Update dropzone text & validate when file selected via dialog
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            if (!validateFile(file)) {
+                errorMessage.textContent = 'Error: Only Excel (.xls, .xlsx) or CSV files are allowed.';
+                resetDropzoneText();
+                fileInput.value = '';
+                return;
+            }
+
+            errorMessage.textContent = '';
+            updateDropzoneText(file.name);
+        } else {
+            resetDropzoneText();
+            errorMessage.textContent = '';
+        }
+    });
+
+    // Prevent form submission if file invalid
+    document.getElementById('uploadForm').addEventListener('submit', (e) => {
+        if (!fileInput.files.length) {
+            errorMessage.textContent = 'Please select a file before uploading.';
+            e.preventDefault();
+            return;
+        }
+        const file = fileInput.files[0];
+        if (!validateFile(file)) {
+            errorMessage.textContent = 'Error: Only Excel (.xls, .xlsx) or CSV files are allowed.';
+            e.preventDefault();
+        }
+    });
+</script>
+
+</body>
+</html>

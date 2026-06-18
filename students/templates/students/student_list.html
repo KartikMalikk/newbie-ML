@@ -1,0 +1,434 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>EduPredict | Student List</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", "Segoe UI", sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        /* Background Video */
+        .video-bg {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        /* Dark Overlay */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(
+                rgba(0,0,0,0.65),
+                rgba(0,0,0,0.65)
+            );
+            z-index: -1;
+        }
+
+        /* Center Layout */
+        .container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Glass Card */
+        .card {
+            max-width: 95vw; /* responsive */
+            width: 900px; /* increased width */
+            padding: 30px 30px;
+            border-radius: 16px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+            animation: fadeInUp 0.9s ease;
+            overflow-x: auto; /* allow horizontal scroll if needed */
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Headings */
+        .title {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            margin-bottom: 24px;
+            font-size: 1.05rem;
+            color: #cfd8dc;
+        }
+
+        /* Filter row inputs/selects */
+        .filter-row input,
+        .filter-row select {
+            width: 90%;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.9rem;
+            outline: none;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .filter-row input:focus,
+        .filter-row select:focus {
+            box-shadow: 0 0 5px rgba(0,198,255,0.7);
+        }
+
+        /* Numeric filters get full width */
+        .filter-row input.numeric-filter {
+            width: 100%;
+        }
+
+        /* Enhanced Table Styles */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            table-layout: fixed;
+            word-wrap: break-word;
+        }
+
+        thead tr {
+            background: rgba(255, 255, 255, 0.15);
+            color: #d1eaff;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(255,255,255,0.4);
+        }
+
+        thead th {
+            padding: 14px 12px;
+            user-select: none;
+        }
+
+        tbody tr {
+            background: rgba(255, 255, 255, 0.05);
+            transition: background-color 0.3s ease;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 198, 255, 0.15);
+            cursor: default;
+        }
+
+        tbody td {
+            padding: 12px 12px;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            overflow-wrap: break-word;
+        }
+
+        /* Adjusted fixed widths and alignment */
+        thead th:nth-child(1), tbody td:nth-child(1) { 
+            width: 22%; 
+            text-align: left; /* Name */
+        }
+        thead th:nth-child(2), tbody td:nth-child(2) { 
+            width: 12%; 
+            text-align: center; /* Gender */
+        }
+        thead th:nth-child(3), tbody td:nth-child(3) { 
+            width: 13%; 
+            text-align: right; /* Hours Studied */
+        }
+        thead th:nth-child(4), tbody td:nth-child(4) { 
+            width: 17%;  /* Wider Attendance */
+            text-align: right;
+        }
+        thead th:nth-child(5), tbody td:nth-child(5) { 
+            width: 16%; 
+            text-align: right; /* Previous Score */
+        }
+        thead th:nth-child(6), tbody td:nth-child(6) { 
+            width: 20%; 
+            text-align: right; /* Marks */
+        }
+
+        /* Emphasize first column (Name) */
+        tbody td:first-child {
+            font-weight: 600;
+            color: #00c6ff;
+        }
+
+        /* Emphasize marks column */
+        tbody td:last-child {
+            font-weight: 700;
+            color: #42a5f5;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 900px) {
+            .card {
+                width: 100%;
+                padding: 20px 15px;
+            }
+            thead th, tbody td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+            thead th:nth-child(1), tbody td:nth-child(1) { width: 25%; }
+            thead th:nth-child(2), tbody td:nth-child(2) { width: 15%; }
+            thead th:nth-child(3), tbody td:nth-child(3) { width: 20%; }
+            thead th:nth-child(4), tbody td:nth-child(4) { width: 15%; }
+            thead th:nth-child(5), tbody td:nth-child(5) { width: 15%; }
+            thead th:nth-child(6), tbody td:nth-child(6) { width: 20%; }
+        }
+
+        /* Back Link */
+        .back {
+            display: inline-block;
+            margin-top: 22px;
+            font-size: 0.9rem;
+            color: #90caf9;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .back:hover {
+            color: #42a5f5;
+            text-decoration: underline;
+        }
+
+        /* Logout Button */
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #42a5f5;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease;
+            z-index: 1000; /* above all */
+        }
+
+        .logout-button:hover {
+            background: #1e88e5;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Logout Button -->
+<a href="{% url 'logout' %}" class="logout-button">Logout</a>
+
+<!-- Background Video -->
+<video class="video-bg" autoplay muted loop>
+    <source src="{% static 'students/bg.mp4' %}" type="video/mp4" />
+    Your browser does not support the video tag.
+</video>
+
+<div class="overlay"></div>
+
+<div class="container">
+    <div class="card">
+        <h1 class="title">Student List</h1>
+        <p class="subtitle">View all students and their predicted performance marks</p>
+
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Hours Studied</th>
+                    <th>Attendance (%)</th>
+                    <th>Previous Score</th>
+                    <th>Marks (Predicted/Actual)</th>
+                </tr>
+                <tr class="filter-row">
+                    <th><input type="text" placeholder="Filter Name" class="column-filter" data-col="0" /></th>
+                    <th>
+                        <select class="column-filter" data-col="1">
+                            <option value="">All</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </th>
+                    <th><input type="text" placeholder="e.g. >10, 5-15" class="column-filter numeric-filter" data-col="2" /></th>
+                    <th><input type="text" placeholder="e.g. >=80, 75-90" class="column-filter numeric-filter" data-col="3" /></th>
+                    <th><input type="text" placeholder="e.g. =50, 40-60" class="column-filter numeric-filter" data-col="4" /></th>
+                    <th><input type="text" placeholder="e.g. <70, 65-80" class="column-filter numeric-filter" data-col="5" /></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.name }}</td>
+                    <td style="text-align:center;">{{ student.gender }}</td>
+                    <td style="text-align:right;">{{ student.hours_studied }}</td>
+                    <td style="text-align:right;">{{ student.attendance }}%</td>
+                    <td style="text-align:right;">{{ student.previous_score }}</td>
+                    <td style="text-align:right;">
+                        {% if student.marks %}
+                            {{ student.marks|floatformat:2 }}
+                        {% else %}
+                            <span style="color:#999;">Not Available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color:#bbb;">
+                        No student data available.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{% url 'upload' %}" class="back">← Upload More Data</a>
+    </div>
+</div>
+
+<script>
+    // Parse numeric filter input string to object describing filter type
+    function parseNumericFilter(filterStr) {
+        filterStr = filterStr.trim();
+        if (!filterStr) return null;
+
+        // Range format: "min-max"
+        if (filterStr.includes('-')) {
+            const parts = filterStr.split('-').map(s => parseFloat(s.trim()));
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                return { type: 'range', min: parts[0], max: parts[1] };
+            }
+        }
+
+        // Comparison operators
+        const operatorMatch = filterStr.match(/^(>=|<=|>|<|=)?\s*(\d+(\.\d+)?)$/);
+        if (operatorMatch) {
+            return {
+                type: 'compare',
+                operator: operatorMatch[1] || '=', // default '='
+                value: parseFloat(operatorMatch[2])
+            };
+        }
+
+        // Fallback: simple number match
+        const num = parseFloat(filterStr);
+        if (!isNaN(num)) {
+            return { type: 'compare', operator: '=', value: num };
+        }
+
+        return null;
+    }
+
+    // Check if a cell's numeric value passes the filter
+    function checkNumericFilter(cellValue, filterObj) {
+        const val = parseFloat(cellValue);
+        if (isNaN(val) || !filterObj) return true; // can't filter invalid numbers
+
+        switch(filterObj.type) {
+            case 'range':
+                return val >= filterObj.min && val <= filterObj.max;
+            case 'compare':
+                switch(filterObj.operator) {
+                    case '>': return val > filterObj.value;
+                    case '>=': return val >= filterObj.value;
+                    case '<': return val < filterObj.value;
+                    case '<=': return val <= filterObj.value;
+                    case '=': return val === filterObj.value;
+                    default: return true;
+                }
+            default:
+                return true;
+        }
+    }
+
+    // Multi-column filter functionality
+    document.querySelectorAll('.column-filter').forEach(input => {
+        input.addEventListener('input', filterTable);
+        input.addEventListener('change', filterTable); // for selects
+    });
+
+    function filterTable() {
+        const filters = Array.from(document.querySelectorAll('.column-filter')).map(input => input.value.toLowerCase().trim());
+        const rows = document.querySelectorAll('#studentTable tbody tr');
+
+        // Parse numeric filters once for performance (columns 2 to 5)
+        const numericFilters = [2,3,4,5].map(idx => parseNumericFilter(filters[idx]));
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            let show = true;
+
+            filters.forEach((filter, index) => {
+                if (filter) {
+                    let cellText = cells[index].textContent.toLowerCase().trim();
+
+                    if (index === 3) {
+                        cellText = cellText.replace('%', ''); // attendance remove %
+                    }
+
+                    if (index === 1) {
+                        // Gender exact match
+                        if (filter !== '' && cellText !== filter) {
+                            show = false;
+                        }
+                    } else if ([2,3,4,5].includes(index)) {
+                        // Numeric filters
+                        if (!checkNumericFilter(cellText, numericFilters[index - 2])) {
+                            show = false;
+                        }
+                    } else {
+                        // Text includes filter
+                        if (!cellText.includes(filter)) {
+                            show = false;
+                        }
+                    }
+                }
+            });
+
+            row.style.display = show ? '' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>
